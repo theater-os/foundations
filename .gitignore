@@ -3,6 +3,11 @@ node_modules/
 .pnp
 .pnp.js
 
+# lockfiles
+*.lockb
+*.lock
+*.lock.json
+
 # Production builds
 dist/
 build/

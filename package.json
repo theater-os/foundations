@@ -9,10 +9,16 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build --filter=!@theateros/foundation && changeset publish"
   },
   "devDependencies": {
-    "turbo": "^1.10.12"
+    "@biomejs/biome": "^2.2.5",
+    "@changesets/cli": "^2.26.0",
+    "turbo": "^1.10.12",
+    "typescript": "^5.7.3"
   },
   "packageManager": "bun@1.0.0"
 }

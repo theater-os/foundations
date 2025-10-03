@@ -1,6 +1,0 @@
-[install]
-cache = true
-frozenLockfile = true
-
-[install.scopes]
-"@theateros" = "https://npm.pkg.github.com"
