@@ -4,6 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "lint": "biome check .",
+    "test": "bun test",
     "build:dist": "tsc"
   },
   "devDependencies": {
