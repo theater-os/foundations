@@ -1,6 +1,6 @@
 # Theater OS - Foundations
 
-![foundations logo](./.etc/assets/foundation-logo.jpeg)
+![foundations logo](./.etc/assets/foundation-logo.webp)
 
 ## 🥸 Presentation
 
