@@ -1,19 +1,12 @@
-# @theateros/foundations
+# Theater OS - Foundations
 
-A Bun monorepo containing all my open source libraries and packages. This repository serves as the central hub for developing, maintaining, and publishing various TypeScript/JavaScript libraries under the `@theateros` scope.
+![foundations logo](./.etc/assets/foundation-logo.jpeg)
 
-## 🚀 Getting Started
+## 🥸 Presentation
 
-Install dependencies:
+Theater OS - Foundations is a bun monorepo centralizing all open sources tools for
+the theater OS company.
 
-```bash
-bun install
-```
+## 📚 Follow The Guide
 
-## 📦 Available Scripts
-
-- `bun run build` - Build all packages
-- `bun run dev` - Start development mode for all packages
-- `bun run lint` - Lint all packages
-- `bun run test` - Test all packages
-- `bun run clean` - Clean all packages
+@todo
