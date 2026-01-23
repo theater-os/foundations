@@ -1,6 +1,8 @@
 # Theater OS - Foundations
 
-![foundations logo](./.etc/assets/foundation-logo.webp)
+<p textAlign="center">
+  <img src="./.etc/assets/foundation-logo.webp" alt="Theater OS - foundations - logo">
+</P>
 
 ## 🥸 Presentation
 
