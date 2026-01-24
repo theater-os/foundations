@@ -1,0 +1,27 @@
+{
+  "name": "@theateros/match",
+  "version": "0.0.2",
+  "module": "dist/match.js",
+  "type": "module",
+  "scripts": {
+    "lint": "biome check .",
+    "test": "bun test",
+    "build:dist": "tsc",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "release-it": "catalog:"
+  },
+  "peerDependencies": {},
+  "exports": {
+    ".": {
+      "types": "./dist/match.d.ts",
+      "default": "./dist/match.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
