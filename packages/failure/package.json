@@ -2,7 +2,6 @@
   "name": "@theateros/failure",
   "module": "dist/failure.js",
   "type": "module",
-  "private": true,
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
