@@ -1,6 +1,6 @@
 {
   "name": "@theateros/failure",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "module": "dist/failure.js",
   "type": "module",
   "scripts": {
