@@ -1,5 +1,5 @@
 {
-  "name": "failure",
+  "name": "@theateros/failure",
   "module": "dist/failure.js",
   "type": "module",
   "private": true,
