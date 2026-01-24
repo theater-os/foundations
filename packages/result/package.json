@@ -6,11 +6,13 @@
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
-    "build:dist": "tsc"
+    "build:dist": "tsc",
+    "release": "release-it"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "release-it": "catalog:"
   },
   "exports": {
     ".": {
