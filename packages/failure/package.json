@@ -1,0 +1,23 @@
+{
+  "name": "@theateros/failure",
+  "version": "0.0.0",
+  "module": "dist/failure.js",
+  "type": "module",
+  "scripts": {
+    "lint": "biome check .",
+    "test": "bun test",
+    "build:dist": "tsc"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/failure.d.ts",
+      "import": "./dist/failure.js"
+    }
+  }
+}

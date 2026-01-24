@@ -1,0 +1,4 @@
+{
+  "$schema": "https://raw.githubusercontent.com/release-it/release-it/latest/config-schema.json",
+  "npm": false
+}
