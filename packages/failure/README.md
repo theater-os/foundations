@@ -1,4 +1,4 @@
-# Failure
+# Theater OS - Failure
 
 <p align="center">
   <img src="../../.etc/assets/failure-logo.webp" alt="Theater OS - Foundations - Failure">
