@@ -1,3 +1,4 @@
+import { Failure } from '@theateros/failure'
 import { Result } from '@theateros/result'
 
 /**
@@ -34,13 +35,20 @@ export type FuturPayload = {
 export type FuturRunner = (payload: FuturPayload) => void
 
 /**
+ * The failure class for aborted futures.
+ */
+export class AbortedFailure extends Failure.named('AbortedFailure') {}
+
+/**
  * The Futur class. It is a PromiseLike that can be used to resolve or reject the Futur.
  * It is used to wrap a function that can be resolved or rejected with a value or a reason.
  *
  * @typeparam T - The value type.
  * @typeparam E - The error type.
  */
-export class Futur<T, E> implements PromiseLike<Result<T, E>> {
+export class Futur<T, E> implements PromiseLike<Result<T, E | AbortedFailure>> {
+  public abortController: AbortController
+
   /**
    * Create a new Futur instance from a runner function.
    *
@@ -76,7 +84,9 @@ export class Futur<T, E> implements PromiseLike<Result<T, E>> {
     })
   }
 
-  constructor(private readonly runner: FuturRunner) {}
+  constructor(private readonly runner: FuturRunner) {
+    this.abortController = new AbortController()
+  }
 
   /**
    * Run and convert the Futur to a Promise.
@@ -87,17 +97,23 @@ export class Futur<T, E> implements PromiseLike<Result<T, E>> {
    * @returns The result of the Futur.
    */
   // biome-ignore lint/suspicious/noThenProperty: we need to return a PromiseLike
-  async then<TResult1 = Result<T, E>>(
-    onfulfilled?: ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+  async then<TResult1 = Result<T, E | AbortedFailure>>(
+    onfulfilled?: ((value: Result<T, E | AbortedFailure>) => TResult1 | PromiseLike<TResult1>) | undefined | null,
   ): Promise<TResult1> {
     try {
-      const abortController = new AbortController()
+      this.abortController = new AbortController()
 
       const p = new Promise((resolve, reject) => {
+        this.abortController.signal.addEventListener('abort', () => {
+          try {
+            reject(Failure.ofNamed(AbortedFailure, 'Futur has been aborted'))
+          } catch {}
+        })
+
         this.runner({
           resolve,
           reject,
-          abortController,
+          abortController: this.abortController,
         })
       })
 
