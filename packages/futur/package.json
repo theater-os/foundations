@@ -1,0 +1,30 @@
+{
+  "name": "@theateros/futur",
+  "version": "0.0.0",
+  "module": "dist/futur.js",
+  "type": "module",
+  "scripts": {
+    "lint": "biome check .",
+    "test": "bun test",
+    "build:dist": "tsc",
+    "release": "release-it"
+  },
+  "dependencies": {
+    "@theateros/result": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "release-it": "catalog:"
+  },
+  "peerDependencies": {},
+  "exports": {
+    ".": {
+      "types": "./dist/futur.d.ts",
+      "default": "./dist/futur.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
