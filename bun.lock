@@ -23,7 +23,7 @@
     },
     "packages/match": {
       "name": "@theateros/match",
-      "version": "0.0.2",
+      "version": "0.0.0",
       "dependencies": {
         "@theateros/failure": "^0.0.2",
       },
@@ -438,6 +438,8 @@
     "yoctocolors": ["yoctocolors@2.1.2", "", {}, "sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug=="],
 
     "yoctocolors-cjs": ["yoctocolors-cjs@2.1.3", "", {}, "sha512-U/PBtDf35ff0D8X8D0jfdzHYEPFxAI7jJlxZXwCSez5M3190m+QobIfh+sWDWSHMCWWJN2AWamkegn6vr6YBTw=="],
+
+    "@theateros/match/@theateros/failure": ["@theateros/failure@0.0.2", "", {}, "sha512-zDKdj7A3UtQhl7yYFCnv/2CS0OLgHE4qWdKPnJAbYlo8Z3sMhGo7gfQq/b0GW4DJ0/VZkf/NocShOpX9L/USgg=="],
 
     "execa/onetime": ["onetime@6.0.0", "", { "dependencies": { "mimic-fn": "^4.0.0" } }, "sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ=="],
 
