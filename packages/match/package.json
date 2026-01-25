@@ -9,6 +9,9 @@
     "build:dist": "tsc",
     "release": "release-it"
   },
+  "dependencies": {
+    "@theateros/failure": "^0.0.2"
+  },
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:",
