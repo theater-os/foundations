@@ -26,6 +26,7 @@
       "name": "@theateros/futur",
       "version": "0.0.0",
       "dependencies": {
+        "@theateros/failure": "^0.0.2",
         "@theateros/result": "^0.0.1",
       },
       "devDependencies": {
