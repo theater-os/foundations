@@ -19,7 +19,7 @@ JavaScript Promises are eager - they start executing immediately upon creation. 
 
 - **Lazy execution**: The async operation only runs when you `await` the Futur
 - **Type-safe errors**: Returns `Result<T, E>` with typed success and error values
-- **Built-in cancellation**: Every Futur runner receives the Futur instance for cancellation control
+- **Built-in cancellation**: Every Futur runner receives a special FuturAbortion instance for cancellation control
 - **No exceptions**: Errors are captured as `Result.err` values, not thrown
 - **Promise interoperability**: Works with `async/await`, `Promise.all`, `Promise.race`, etc.
 
@@ -34,19 +34,19 @@ npm install @theateros/futur
 ### Basic Usage
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
 // Create a Futur - it won't run until awaited
 const futur = Futur.of<string, Error>(({ resolve }) => {
-  resolve('Hello, World!')
-})
+  resolve("Hello, World!");
+});
 
 // Run the Futur and get a Result
-const result = await futur
+const result = await futur;
 
 if (Result.isOk(result)) {
-  console.log(result.value) // "Hello, World!"
+  console.log(result.value); // "Hello, World!"
 }
 ```
 
@@ -55,33 +55,33 @@ if (Result.isOk(result)) {
 Use `Futur.of` to create a Futur from a runner function:
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
 // Success case
 const successFutur = Futur.of<number, string>(({ resolve }) => {
-  resolve(42)
-})
+  resolve(42);
+});
 
 // Error case
 const errorFutur = Futur.of<number, string>(({ reject }) => {
-  reject('Something went wrong')
-})
+  reject("Something went wrong");
+});
 
 // Async operations
 const asyncFutur = Futur.of<string, Error>(({ resolve }) => {
-  setTimeout(() => resolve('Delayed result'), 1000)
-})
+  setTimeout(() => resolve("Delayed result"), 1000);
+});
 
 // All results are type-safe
-const result = await successFutur
+const result = await successFutur;
 if (Result.isOk(result)) {
-  console.log(result.value) // 42
+  console.log(result.value); // 42
 }
 
-const errorResult = await errorFutur
+const errorResult = await errorFutur;
 if (Result.isErr(errorResult)) {
-  console.log(errorResult.error) // "Something went wrong"
+  console.log(errorResult.error); // "Something went wrong"
 }
 ```
 
@@ -90,19 +90,27 @@ if (Result.isErr(errorResult)) {
 Use `Futur.ofPromise` to wrap existing Promise-returning functions:
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
+
+// Let's take some standard async operation
+async function stdFetchUser(id: string): Record<string, string> {
+  const response = await fetch(`/api/users/${id}`);
+
+  const data = await response.json();
+
+  return data as Record<string, string>;
+}
 
 // Wrap a fetch call
-const fetchUser = (id: number) =>
-  Futur.ofPromise(() => fetch(`/api/users/${id}`).then(res => res.json()))
+const fetchUser = (id: string) => Futur.ofPromise(() => stdFetchUser(id));
 
-const result = await fetchUser(1)
+const result = await fetchUser(1);
 
 if (Result.isOk(result)) {
-  console.log('User:', result.value)
+  console.log("User:", result.value);
 } else {
-  console.log('Error:', result.error)
+  console.log("Error:", result.error);
 }
 ```
 
@@ -111,27 +119,28 @@ if (Result.isOk(result)) {
 Transform errors using the optional `catcher` parameter:
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
 interface ApiError {
-  code: string
-  message: string
+  code: string;
+  message: string;
 }
 
 const fetchData = Futur.ofPromise(
-  () => fetch('/api/data').then(res => res.json()),
-  (error) => ({
-    code: 'FETCH_ERROR',
-    message: String(error)
-  } as ApiError)
-)
+  () => fetch("/api/data").then((res) => res.json()),
+  (error) =>
+    ({
+      code: "FETCH_ERROR",
+      message: String(error),
+    }) as ApiError,
+);
 
-const result = await fetchData
+const result = await fetchData;
 
 if (Result.isErr(result)) {
   // error is typed as ApiError
-  console.log(`Error ${result.error.code}: ${result.error.message}`)
+  console.log(`Error ${result.error.code}: ${result.error.message}`);
 }
 ```
 
@@ -144,37 +153,36 @@ Every Futur has built-in cancellation support. When aborted, the Futur rejects w
 The runner receives an `abortion` object in its payload, which provides access to cancellation methods and the abort controller:
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
 const fetchWithAbort = Futur.of<Response, Error>(({ resolve, reject, abortion }) => {
   // Use the provided abort controller with fetch
-  fetch('/api/data', { signal: abortion.controller.signal })
-    .then(resolve)
-    .catch(reject)
-})
+  fetch("/api/data", { signal: abortion.controller.signal }).then(resolve).catch(reject);
+});
 
-const result = await fetchWithAbort
+const result = await fetchWithAbort;
 ```
 
 You can also abort directly from within the runner:
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
 const conditionalFutur = Futur.of<string, never>(({ resolve, abortion }) => {
   // Check some condition and abort if needed
   if (someCondition) {
-    abortion.abort()
-    return
+    abortion.abort();
+    return;
   }
-  
-  resolve('success')
-})
+
+  resolve("success");
+});
 ```
 
 The `abortion` object provides:
+
 - `abort()`: Abort the Futur operation
 - `isAborted()`: Check if the Futur has been aborted
 - `onAbort(callback)`: Register a callback for abort events
@@ -185,24 +193,24 @@ The `abortion` object provides:
 Use the `abort()` method to cancel a Futur from outside:
 
 ```typescript
-import { Futur, AbortedFailure } from '@theateros/futur'
-import { Result } from '@theateros/result'
-import { Failure } from '@theateros/failure'
+import { Futur, AbortedFailure } from "@theateros/futur";
+import { Result } from "@theateros/result";
+import { Failure } from "@theateros/failure";
 
 const longRunningTask = Futur.of<string, never>(({ resolve }) => {
-  setTimeout(() => resolve('completed'), 10000)
-})
+  setTimeout(() => resolve("completed"), 10000);
+});
 
 // Cancel after 1 second
 setTimeout(() => {
-  longRunningTask.abort()
-}, 1000)
+  longRunningTask.abort();
+}, 1000);
 
-const result = await longRunningTask
+const result = await longRunningTask;
 
 if (Result.isErr(result)) {
-  if (Failure.isNamed(result.error, 'AbortedFailure')) {
-    console.log('Task was cancelled:', result.error.message)
+  if (Failure.isNamed(result.error, "AbortedFailure")) {
+    console.log("Task was cancelled:", result.error.message);
     // "Task was cancelled: Futur has been aborted"
   }
 }
@@ -213,21 +221,21 @@ if (Result.isErr(result)) {
 Use the `aborted` getter to check if a Futur has been aborted:
 
 ```typescript
-import { Futur } from '@theateros/futur'
+import { Futur } from "@theateros/futur";
 
 const futur = Futur.of<string, never>(({ resolve }) => {
-  setTimeout(() => resolve('done'), 1000)
-})
+  setTimeout(() => resolve("done"), 1000);
+});
 
-const promise = futur.then()
+const promise = futur.then();
 
 // Check if aborted
-console.log(futur.aborted) // false
+console.log(futur.aborted); // false
 
-futur.abort()
+futur.abort();
 
 // Note: aborted may be false after cleanup, check the result instead
-const result = await promise
+const result = await promise;
 ```
 
 #### Handling AbortedFailure
@@ -235,26 +243,26 @@ const result = await promise
 When a Futur is aborted, it rejects with an `AbortedFailure`:
 
 ```typescript
-import { Futur, AbortedFailure } from '@theateros/futur'
-import { Result } from '@theateros/result'
-import { Failure } from '@theateros/failure'
+import { Futur, AbortedFailure } from "@theateros/futur";
+import { Result } from "@theateros/result";
+import { Failure } from "@theateros/failure";
 
 const futur = Futur.of<string, Error>(({ resolve, abortion }) => {
   // Simulate cancellation
-  abortion.abort()
-})
+  abortion.abort();
+});
 
-const result = await futur
+const result = await futur;
 
 if (Result.isErr(result)) {
   // Check if it was aborted
   if (result.error instanceof AbortedFailure) {
-    console.log('Operation was aborted')
+    console.log("Operation was aborted");
   }
 
   // Or use Failure.isNamed
-  if (Failure.isNamed(result.error, 'AbortedFailure')) {
-    console.log('Operation was aborted')
+  if (Failure.isNamed(result.error, "AbortedFailure")) {
+    console.log("Operation was aborted");
   }
 }
 ```
@@ -264,28 +272,28 @@ if (Result.isErr(result)) {
 A Futur creates a fresh execution context on each run, so you can re-run a Futur after it was aborted:
 
 ```typescript
-import { Futur, AbortedFailure } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur, AbortedFailure } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
-let attempt = 0
+let attempt = 0;
 
 const retryableFutur = Futur.of<string, never>(({ resolve, abortion }) => {
-  attempt++
+  attempt++;
   if (attempt === 1) {
-    abortion.abort() // Abort first attempt
+    abortion.abort(); // Abort first attempt
   } else {
-    resolve(`Success on attempt ${attempt}`)
+    resolve(`Success on attempt ${attempt}`);
   }
-})
+});
 
 // First run - aborted
-const result1 = await retryableFutur
-console.log(Result.isErr(result1)) // true
+const result1 = await retryableFutur;
+console.log(Result.isErr(result1)); // true
 
 // Second run - succeeds with fresh execution context
-const result2 = await retryableFutur
+const result2 = await retryableFutur;
 if (Result.isOk(result2)) {
-  console.log(result2.value) // "Success on attempt 2"
+  console.log(result2.value); // "Success on attempt 2"
 }
 ```
 
@@ -294,33 +302,33 @@ if (Result.isOk(result2)) {
 Use `onAbort()` to register callbacks that will be called when the Futur is aborted. You can use this from within the runner or from outside:
 
 ```typescript
-import { Futur } from '@theateros/futur'
+import { Futur } from "@theateros/futur";
 
 // From within the runner
 const futur = Futur.of<string, never>(({ resolve, abortion }) => {
   // Register abort callback from within the runner
   abortion.onAbort(() => {
-    console.log('Futur was aborted from within!')
-  })
-  
-  setTimeout(() => resolve('done'), 1000)
-})
+    console.log("Futur was aborted from within!");
+  });
+
+  setTimeout(() => resolve("done"), 1000);
+});
 
 // Or from outside
-const promise = futur.then()
+const promise = futur.then();
 
 // Register abort callback from outside
 const removeCallback = futur.onAbort(() => {
-  console.log('Futur was aborted from outside!')
-})
+  console.log("Futur was aborted from outside!");
+});
 
 // Abort the Futur
-futur.abort()
+futur.abort();
 
 // Remove the callback if needed
-removeCallback()
+removeCallback();
 
-await promise
+await promise;
 ```
 
 ### Deferred Execution
@@ -328,18 +336,18 @@ await promise
 Futurs are lazy - they only execute when awaited:
 
 ```typescript
-import { Futur } from '@theateros/futur'
+import { Futur } from "@theateros/futur";
 
 // This does NOT start the operation
 const futur = Futur.of<string, never>(({ resolve }) => {
-  console.log('Running!')
-  resolve('done')
-})
+  console.log("Running!");
+  resolve("done");
+});
 
-console.log('Futur created')
+console.log("Futur created");
 
 // This starts the operation
-const result = await futur
+const result = await futur;
 // Output:
 // "Futur created"
 // "Running!"
@@ -350,27 +358,27 @@ const result = await futur
 Futurs work seamlessly with Promise utilities:
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
-const futur1 = Futur.of<number, never>(({ resolve }) => resolve(1))
-const futur2 = Futur.of<number, never>(({ resolve }) => resolve(2))
-const futur3 = Futur.of<number, never>(({ resolve }) => resolve(3))
+const futur1 = Futur.of<number, never>(({ resolve }) => resolve(1));
+const futur2 = Futur.of<number, never>(({ resolve }) => resolve(2));
+const futur3 = Futur.of<number, never>(({ resolve }) => resolve(3));
 
 // Use with Promise.all
-const results = await Promise.all([futur1, futur2, futur3])
+const results = await Promise.all([futur1, futur2, futur3]);
 // results is Result<number, never>[]
 
 // Use with Promise.race
 const slowFutur = Futur.of<string, never>(({ resolve }) => {
-  setTimeout(() => resolve('slow'), 1000)
-})
+  setTimeout(() => resolve("slow"), 1000);
+});
 
 const fastFutur = Futur.of<string, never>(({ resolve }) => {
-  resolve('fast')
-})
+  resolve("fast");
+});
 
-const winner = await Promise.race([slowFutur, fastFutur])
+const winner = await Promise.race([slowFutur, fastFutur]);
 // winner.value === 'fast'
 ```
 
@@ -379,22 +387,22 @@ const winner = await Promise.race([slowFutur, fastFutur])
 Use the `then` callback to transform results:
 
 ```typescript
-import { Futur } from '@theateros/futur'
-import { Result } from '@theateros/result'
+import { Futur } from "@theateros/futur";
+import { Result } from "@theateros/result";
 
 const futur = Futur.of<number, string>(({ resolve }) => {
-  resolve(21)
-})
+  resolve(21);
+});
 
 // Transform the result
-const doubled = await futur.then(result => {
+const doubled = await futur.then((result) => {
   if (Result.isOk(result)) {
-    return result.value * 2
+    return result.value * 2;
   }
-  return 0
-})
+  return 0;
+});
 
-console.log(doubled) // 42
+console.log(doubled); // 42
 ```
 
 ## API Reference
@@ -417,11 +425,11 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
   ```typescript
   const futur = Futur.of<string, Error>(({ resolve, reject, abortion }) => {
     // Your async logic here
-    resolve('success')
+    resolve("success");
     // or: reject(new Error('failure'))
     // Use abortion.abort() to cancel from within the runner
     // Use abortion.controller.signal with fetch, streams, etc.
-  })
+  });
   ```
 
 - **`Futur.ofPromise<P, E>(launcher: () => P, catcher?: (error: unknown) => E): Futur<Awaited<P>, E>`**
@@ -430,9 +438,9 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
 
   ```typescript
   const futur = Futur.ofPromise(
-    () => fetch('/api/data'),
-    (error) => ({ code: 'ERROR', message: String(error) })
-  )
+    () => fetch("/api/data"),
+    (error) => ({ code: "ERROR", message: String(error) }),
+  );
   ```
 
 #### Instance Methods
@@ -447,13 +455,13 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
 
   ```typescript
   const futur = Futur.of<string, never>(({ resolve }) => {
-    setTimeout(() => resolve('done'), 5000)
-  })
+    setTimeout(() => resolve("done"), 5000);
+  });
 
   // Cancel after 1 second
-  setTimeout(() => futur.abort(), 1000)
+  setTimeout(() => futur.abort(), 1000);
 
-  const result = await futur // Result.err(AbortedFailure)
+  const result = await futur; // Result.err(AbortedFailure)
   ```
 
 - **`get aborted: boolean`**
@@ -462,13 +470,13 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
 
   ```typescript
   const futur = Futur.of<string, never>(({ resolve }) => {
-    setTimeout(() => resolve('done'), 1000)
-  })
+    setTimeout(() => resolve("done"), 1000);
+  });
 
-  const promise = futur.then()
-  console.log(futur.aborted) // false
+  const promise = futur.then();
+  console.log(futur.aborted); // false
 
-  futur.abort()
+  futur.abort();
   // Note: aborted may be false after cleanup, check the result instead
   ```
 
@@ -478,21 +486,21 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
 
   ```typescript
   const futur = Futur.of<string, never>(({ resolve }) => {
-    setTimeout(() => resolve('done'), 1000)
-  })
+    setTimeout(() => resolve("done"), 1000);
+  });
 
-  const promise = futur.then()
+  const promise = futur.then();
 
   const removeCallback = futur.onAbort(() => {
-    console.log('Aborted!')
-  })
+    console.log("Aborted!");
+  });
 
-  futur.abort() // Calls the callback
+  futur.abort(); // Calls the callback
 
   // Remove the callback
-  removeCallback()
+  removeCallback();
 
-  await promise
+  await promise;
   ```
 
 ### `AbortedFailure` Class
@@ -500,15 +508,15 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
 A named Failure class used when a Futur is aborted. Extends `Failure` from `@theateros/failure`.
 
 ```typescript
-import { AbortedFailure } from '@theateros/futur'
-import { Failure } from '@theateros/failure'
+import { AbortedFailure } from "@theateros/futur";
+import { Failure } from "@theateros/failure";
 
-const failure = new AbortedFailure('Operation cancelled')
+const failure = new AbortedFailure("Operation cancelled");
 
 // Type checking
-failure instanceof AbortedFailure // true
-failure instanceof Failure        // true
-Failure.isNamed(failure, 'AbortedFailure') // true
+failure instanceof AbortedFailure; // true
+failure instanceof Failure; // true
+Failure.isNamed(failure, "AbortedFailure"); // true
 ```
 
 ### Types
@@ -519,10 +527,10 @@ The payload passed to the runner function:
 
 ```typescript
 type FuturPayload = {
-  resolve: <V>(value: V) => void
-  reject: <E>(reason: E) => void
-  abortion: FuturAbortion
-}
+  resolve: <V>(value: V) => void;
+  reject: <E>(reason: E) => void;
+  abortion: FuturAbortion;
+};
 ```
 
 #### `FuturAbortion`
@@ -531,14 +539,15 @@ The abortion API provided to the runner:
 
 ```typescript
 type FuturAbortion = Readonly<{
-  abort: () => void
-  isAborted: () => boolean
-  onAbort: (callback: () => void) => () => void
-  controller: AbortController
-}>
+  abort: () => void;
+  isAborted: () => boolean;
+  onAbort: (callback: () => void) => () => void;
+  controller: AbortController;
+}>;
 ```
 
 The `abortion` property provides:
+
 - `abort()`: Abort the Futur operation
 - `isAborted()`: Check if the Futur has been aborted
 - `onAbort(callback)`: Register a callback for abort events (returns a function to remove the callback)
@@ -549,7 +558,7 @@ The `abortion` property provides:
 The runner function type:
 
 ```typescript
-type FuturRunner = (payload: FuturPayload) => void
+type FuturRunner = (payload: FuturPayload) => void;
 ```
 
 ## Best Practices
