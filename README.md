@@ -15,6 +15,7 @@ Theater OS - Foundations is a bun monorepo centralizing all open source tools fo
 A domain-specific error class that extends the native `Error` class with additional properties and utilities for type-safe error handling in TypeScript applications.
 
 **Key Features:**
+
 - Type-safe error handling with TypeScript's type system
 - Structured error data through options parameter
 - Named failures for domain-specific error types
@@ -27,6 +28,7 @@ A domain-specific error class that extends the native `Error` class with additio
 A type-safe Result type implementation for TypeScript that provides a functional approach to error handling without throwing exceptions.
 
 **Key Features:**
+
 - Type-safe error handling with explicit error types
 - Composable operations without nested try-catch blocks
 - No exceptions - errors are values
@@ -39,6 +41,7 @@ A type-safe Result type implementation for TypeScript that provides a functional
 A type-safe pattern matching library for TypeScript that provides exhaustive checking and type narrowing for handling multiple value types.
 
 **Key Features:**
+
 - Type-safe pattern matching with automatic type narrowing
 - Exhaustive matching with `Match.any` catch-all
 - Custom predicates for complex matching logic
@@ -51,6 +54,7 @@ A type-safe pattern matching library for TypeScript that provides exhaustive che
 A lazy, type-safe asynchronous computation wrapper that combines Promises with Result-based error handling, providing deferred execution and built-in cancellation support.
 
 **Key Features:**
+
 - Lazy execution - operations only run when awaited
 - Type-safe errors with `Result<T, E>` return types
 - Built-in cancellation with `FuturAbortion` API
@@ -74,15 +78,6 @@ Or install multiple packages:
 ```bash
 npm install @theateros/failure @theateros/result @theateros/match @theateros/futur
 ```
-
-## 📚 Documentation
-
-Each package has comprehensive documentation in its respective README:
-
-- [Failure Documentation](./packages/failure/README.md)
-- [Result Documentation](./packages/result/README.md)
-- [Match Documentation](./packages/match/README.md)
-- [Futur Documentation](./packages/futur/README.md)
 
 ## 🤝 Contributing
 
