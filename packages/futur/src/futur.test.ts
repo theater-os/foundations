@@ -1,7 +1,7 @@
 import { describe, expect, it, jest } from 'bun:test'
 import { Failure } from '@theateros/failure'
 import { Result } from '@theateros/result'
-import { AbortedFailure, Futur } from './futur'
+import { AbortedFailure, Futur, type FuturAbortion } from './futur'
 
 describe('Futur', () => {
   it('should create a Futur instance with a deferred runner', () => {
@@ -60,17 +60,21 @@ describe('Futur.of', () => {
     }
   })
 
-  it('should provide an AbortController to the runner', async () => {
-    let receivedController: AbortController | null = null
+  it('should provide the abortion API to the runner', async () => {
+    let receivedAbortion: FuturAbortion | undefined
 
-    const futur = Futur.of<string, never>(({ resolve, abortController }) => {
-      receivedController = abortController
+    const futur = Futur.of<string, never>(({ resolve, abortion }) => {
+      receivedAbortion = abortion
       resolve('test')
     })
 
     await futur
 
-    expect(receivedController).toBeInstanceOf(AbortController)
+    expect(receivedAbortion).not.toBeNull()
+    expect(typeof receivedAbortion?.abort).toBe('function')
+    expect(typeof receivedAbortion?.isAborted).toBe('function')
+    expect(typeof receivedAbortion?.onAbort).toBe('function')
+    expect(receivedAbortion?.controller).toBeInstanceOf(AbortController)
   })
 })
 
@@ -473,67 +477,39 @@ describe('AbortedFailure', () => {
   })
 })
 
-describe('Futur - abortController', () => {
-  it('should have a public abortController property', () => {
-    const futur = Futur.of<string, never>(({ resolve }) => {
-      resolve('test')
-    })
+describe('Futur - abort', () => {
+  it('should provide the abortion API to the runner', async () => {
+    let receivedAbortion: FuturAbortion | undefined
 
-    expect(futur.abortController).toBeInstanceOf(AbortController)
-  })
-
-  it('should provide an AbortController to the runner', async () => {
-    let receivedController: AbortController | null = null
-
-    const futur = Futur.of<string, never>(({ resolve, abortController }) => {
-      receivedController = abortController
+    const futur = Futur.of<string, never>(({ resolve, abortion }) => {
+      receivedAbortion = abortion
       resolve('test')
     })
 
     await futur
 
-    expect(receivedController).toBeInstanceOf(AbortController)
+    expect(receivedAbortion).not.toBeNull()
+    expect(typeof receivedAbortion?.abort).toBe('function')
+    expect(typeof receivedAbortion?.isAborted).toBe('function')
+    expect(typeof receivedAbortion?.onAbort).toBe('function')
+    expect(receivedAbortion?.controller).toBeInstanceOf(AbortController)
   })
 
-  it('should pass the same abortController to the runner as the public property', async () => {
-    let receivedController: AbortController | null = null
-
-    const futur = Futur.of<string, never>(({ resolve, abortController }) => {
-      receivedController = abortController
-      resolve('test')
-    })
-
-    // Start the futur to trigger the runner
-    await futur
-
-    // The runner receives the same controller as the public property
-    expect(receivedController as unknown as AbortController).toEqual(futur.abortController)
-  })
-
-  it('should allow using the abort signal', async () => {
-    let signal: AbortSignal | null = null
-
-    const futur = Futur.of<string, never>(({ resolve, abortController }) => {
-      signal = abortController.signal
-      resolve('test')
-    })
-
-    await futur
-
-    expect(signal).not.toBeNull()
-    expect((signal as unknown as AbortSignal)?.aborted).toBe(false)
-  })
-
-  it('should allow aborting the operation from within the runner', async () => {
+  it('should allow checking aborted state from within the runner', async () => {
     let wasAborted = false
 
-    const futur = Futur.of<string, string>(({ abortController }) => {
-      abortController.signal.addEventListener('abort', () => {
+    const futur = Futur.of<string, never>(({ resolve, abortion }) => {
+      // Check initial state
+      expect(abortion.isAborted()).toBe(false)
+
+      // Set up abort listener
+      abortion.onAbort(() => {
         wasAborted = true
       })
 
       // Abort immediately
-      abortController.abort()
+      abortion.abort()
+      resolve('test')
     })
 
     const result = await futur
@@ -542,10 +518,10 @@ describe('Futur - abortController', () => {
     expect(Result.isErr(result)).toBe(true)
   })
 
-  it('should reject with AbortedFailure when aborted', async () => {
-    const futur = Futur.of<string, never>(({ abortController }) => {
+  it('should reject with AbortedFailure when aborted from within the runner', async () => {
+    const futur = Futur.of<string, never>(({ abortion }) => {
       // Abort immediately without resolving
-      abortController.abort()
+      abortion.abort()
     })
 
     const result = await futur
@@ -559,14 +535,14 @@ describe('Futur - abortController', () => {
     }
   })
 
-  it('should allow aborting from outside using the public abortController', async () => {
+  it('should allow aborting from outside using the abort method', async () => {
     const futur = Futur.of<string, never>(({ resolve }) => {
       // Simulate a delayed resolution
       setTimeout(() => resolve('delayed'), 1000)
     })
 
     // Abort from outside before awaiting
-    setTimeout(() => futur.abortController.abort(), 10)
+    setTimeout(() => futur.abort(), 10)
 
     const result = await futur
 
@@ -585,7 +561,7 @@ describe('Futur - abortController', () => {
     const result = await futur
 
     // Try to abort after resolution (should have no effect)
-    futur.abortController.abort()
+    futur.abort()
 
     expect(Result.isOk(result)).toBe(true)
 
@@ -594,29 +570,14 @@ describe('Futur - abortController', () => {
     }
   })
 
-  it('should create a new abortController on each then call', async () => {
-    const futur = Futur.of<string, never>(({ resolve }) => {
-      resolve('test')
-    })
-
-    const controllerBefore = futur.abortController
-
-    await futur
-
-    const controllerAfter = futur.abortController
-
-    // A new controller is created when then is called
-    expect(controllerBefore).not.toBe(controllerAfter)
-  })
-
   it('should allow re-running the futur after abort', async () => {
     let callCount = 0
 
-    const futur = Futur.of<number, never>(({ resolve, abortController }) => {
+    const futur = Futur.of<number, never>(({ resolve, abortion }) => {
       callCount++
       // Abort on first call only
       if (callCount === 1) {
-        abortController.abort()
+        abortion.abort()
       } else {
         resolve(callCount)
       }
@@ -631,7 +592,7 @@ describe('Futur - abortController', () => {
       expect(result1.error).toBeInstanceOf(AbortedFailure)
     }
 
-    // Second run - should work normally with new AbortController
+    // Second run - should work normally
     const result2 = await futur
 
     expect(Result.isOk(result2)).toBe(true)
@@ -641,24 +602,169 @@ describe('Futur - abortController', () => {
     }
   })
 
-  it('should reset abortController before each run', async () => {
+  it('should create a new execution context on each then call', async () => {
+    let callCount = 0
+
+    const futur = Futur.of<string, never>(({ resolve }) => {
+      callCount++
+      resolve('test')
+    })
+
+    await futur
+    await futur
+
+    // Each then call creates a new execution
+    expect(callCount).toBe(2)
+  })
+
+  it('should track aborted state correctly', async () => {
+    const futur = Futur.of<string, never>(({ resolve }) => {
+      setTimeout(() => resolve('delayed'), 100)
+    })
+
+    expect(futur.aborted).toBe(false)
+
+    const promise = futur
+
+    setTimeout(() => futur.abort(), 10)
+
+    const result = await promise
+
+    expect(Result.isErr(result)).toBe(true)
+    expect(futur.aborted).toBe(false) // Should be false after cleanup
+  })
+
+  it('should return false for aborted when no controllers exist', () => {
     const futur = Futur.of<string, never>(({ resolve }) => {
       resolve('test')
     })
 
-    // Get the initial controller
-    const initialController = futur.abortController
+    expect(futur.aborted).toBe(false)
+  })
 
-    // Abort the initial controller
-    initialController.abort()
-    expect(initialController.signal.aborted).toBe(true)
+  it('should abort all active controllers', async () => {
+    const futur = Futur.of<string, never>(({ resolve }) => {
+      setTimeout(() => resolve('delayed'), 100)
+    })
 
-    // Run the futur - it should create a new controller
+    // Explicitly call then() to start both promises and create controllers
+    const promise1 = futur.then()
+    const promise2 = futur.then()
+
+    // Now abort all controllers (both should be in the Set)
+    futur.abort()
+
+    const result1 = await promise1
+    const result2 = await promise2
+
+    expect(Result.isErr(result1)).toBe(true)
+    expect(Result.isErr(result2)).toBe(true)
+
+    if (Result.isErr(result1)) {
+      expect(result1.error).toBeInstanceOf(AbortedFailure)
+    }
+    if (Result.isErr(result2)) {
+      expect(result2.error).toBeInstanceOf(AbortedFailure)
+    }
+  })
+
+  it('should call onAbort callbacks when aborted', async () => {
+    const callbacks: boolean[] = []
+
+    const futur = Futur.of<string, never>(({ resolve }) => {
+      setTimeout(() => resolve('delayed'), 100)
+    })
+
+    // Explicitly call then() to start the promise and create a controller
+    const promise = futur.then()
+
+    // Now add callbacks to the existing controller
+    const removeCallback1 = futur.onAbort(() => {
+      callbacks.push(true)
+    })
+    const removeCallback2 = futur.onAbort(() => {
+      callbacks.push(true)
+    })
+
+    setTimeout(() => futur.abort(), 10)
+
+    await promise
+
+    expect(callbacks.length).toBe(2)
+
+    // Test removing callbacks
+    removeCallback1()
+    removeCallback2()
+
+    const futur2 = Futur.of<string, never>(({ resolve }) => {
+      setTimeout(() => resolve('delayed'), 100)
+    })
+
+    const promise2 = futur2.then()
+
+    futur2.onAbort(() => {
+      callbacks.push(true)
+    })
+
+    setTimeout(() => futur2.abort(), 10)
+
+    await promise2
+
+    // Should only have 3 callbacks (2 from first, 1 from second)
+    expect(callbacks.length).toBe(3)
+  })
+
+  it('should remove onAbort callbacks correctly', async () => {
+    let callback1Called = false
+    let callback2Called = false
+
+    const futur = Futur.of<string, never>(({ resolve }) => {
+      setTimeout(() => resolve('delayed'), 100)
+    })
+
+    // Explicitly call then() to start the promise and create a controller
+    const promise = futur.then()
+
+    // Now add callbacks to the existing controller
+    const removeCallback1 = futur.onAbort(() => {
+      callback1Called = true
+    })
+
+    futur.onAbort(() => {
+      callback2Called = true
+    })
+
+    // Remove first callback
+    removeCallback1()
+
+    setTimeout(() => futur.abort(), 10)
+
+    await promise
+
+    expect(callback1Called).toBe(false)
+    expect(callback2Called).toBe(true)
+  })
+
+  it('should provide abort controller for use with fetch and other APIs', async () => {
+    let receivedController: AbortController | undefined
+
+    const futur = Futur.of<string, never>(({ resolve, abortion }) => {
+      receivedController = abortion.controller
+
+      // The controller can be used with fetch or other APIs
+      expect(abortion.controller).toBeInstanceOf(AbortController)
+      expect(abortion.controller.signal).toBeInstanceOf(AbortSignal)
+
+      // Abort immediately to test
+      abortion.abort()
+      resolve('test')
+    })
+
     const result = await futur
 
-    // The new controller should not be aborted
-    expect(futur.abortController.signal.aborted).toBe(false)
-    expect(Result.isOk(result)).toBe(true)
+    expect(receivedController).not.toBeNull()
+    expect(receivedController?.signal.aborted).toBe(true)
+    expect(Result.isErr(result)).toBe(true)
   })
 })
 

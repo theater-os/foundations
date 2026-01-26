@@ -19,7 +19,7 @@ JavaScript Promises are eager - they start executing immediately upon creation. 
 
 - **Lazy execution**: The async operation only runs when you `await` the Futur
 - **Type-safe errors**: Returns `Result<T, E>` with typed success and error values
-- **Built-in AbortController**: Every Futur runner receives an AbortController for cancellation
+- **Built-in cancellation**: Every Futur runner receives the Futur instance for cancellation control
 - **No exceptions**: Errors are captured as `Result.err` values, not thrown
 - **Promise interoperability**: Works with `async/await`, `Promise.all`, `Promise.race`, etc.
 
@@ -135,20 +135,21 @@ if (Result.isErr(result)) {
 }
 ```
 
-### Cancellation with AbortController
+### Cancellation
 
-Every Futur has a built-in `AbortController` for cancellation. When aborted, the Futur rejects with an `AbortedFailure`.
+Every Futur has built-in cancellation support. When aborted, the Futur rejects with an `AbortedFailure`.
 
 #### Aborting from Within the Runner
 
-The runner receives an `abortController` in its payload:
+The runner receives an `abortion` object in its payload, which provides access to cancellation methods and the abort controller:
 
 ```typescript
 import { Futur } from '@theateros/futur'
 import { Result } from '@theateros/result'
 
-const fetchWithAbort = Futur.of<Response, Error>(({ resolve, reject, abortController }) => {
-  fetch('/api/data', { signal: abortController.signal })
+const fetchWithAbort = Futur.of<Response, Error>(({ resolve, reject, abortion }) => {
+  // Use the provided abort controller with fetch
+  fetch('/api/data', { signal: abortion.controller.signal })
     .then(resolve)
     .catch(reject)
 })
@@ -156,9 +157,32 @@ const fetchWithAbort = Futur.of<Response, Error>(({ resolve, reject, abortContro
 const result = await fetchWithAbort
 ```
 
+You can also abort directly from within the runner:
+
+```typescript
+import { Futur } from '@theateros/futur'
+import { Result } from '@theateros/result'
+
+const conditionalFutur = Futur.of<string, never>(({ resolve, abortion }) => {
+  // Check some condition and abort if needed
+  if (someCondition) {
+    abortion.abort()
+    return
+  }
+  
+  resolve('success')
+})
+```
+
+The `abortion` object provides:
+- `abort()`: Abort the Futur operation
+- `isAborted()`: Check if the Futur has been aborted
+- `onAbort(callback)`: Register a callback for abort events
+- `controller`: The `AbortController` instance for use with fetch, streams, etc.
+
 #### Aborting from Outside
 
-The `abortController` is also available as a public property on the Futur instance, allowing you to cancel from outside:
+Use the `abort()` method to cancel a Futur from outside:
 
 ```typescript
 import { Futur, AbortedFailure } from '@theateros/futur'
@@ -171,7 +195,7 @@ const longRunningTask = Futur.of<string, never>(({ resolve }) => {
 
 // Cancel after 1 second
 setTimeout(() => {
-  longRunningTask.abortController.abort()
+  longRunningTask.abort()
 }, 1000)
 
 const result = await longRunningTask
@@ -184,6 +208,28 @@ if (Result.isErr(result)) {
 }
 ```
 
+#### Checking Abort Status
+
+Use the `aborted` getter to check if a Futur has been aborted:
+
+```typescript
+import { Futur } from '@theateros/futur'
+
+const futur = Futur.of<string, never>(({ resolve }) => {
+  setTimeout(() => resolve('done'), 1000)
+})
+
+const promise = futur.then()
+
+// Check if aborted
+console.log(futur.aborted) // false
+
+futur.abort()
+
+// Note: aborted may be false after cleanup, check the result instead
+const result = await promise
+```
+
 #### Handling AbortedFailure
 
 When a Futur is aborted, it rejects with an `AbortedFailure`:
@@ -193,9 +239,9 @@ import { Futur, AbortedFailure } from '@theateros/futur'
 import { Result } from '@theateros/result'
 import { Failure } from '@theateros/failure'
 
-const futur = Futur.of<string, Error>(({ resolve, abortController }) => {
+const futur = Futur.of<string, Error>(({ resolve, abortion }) => {
   // Simulate cancellation
-  abortController.abort()
+  abortion.abort()
 })
 
 const result = await futur
@@ -215,7 +261,7 @@ if (Result.isErr(result)) {
 
 #### Re-running After Abort
 
-A Futur creates a fresh `AbortController` on each run, so you can re-run a Futur after it was aborted:
+A Futur creates a fresh execution context on each run, so you can re-run a Futur after it was aborted:
 
 ```typescript
 import { Futur, AbortedFailure } from '@theateros/futur'
@@ -223,10 +269,10 @@ import { Result } from '@theateros/result'
 
 let attempt = 0
 
-const retryableFutur = Futur.of<string, never>(({ resolve, abortController }) => {
+const retryableFutur = Futur.of<string, never>(({ resolve, abortion }) => {
   attempt++
   if (attempt === 1) {
-    abortController.abort() // Abort first attempt
+    abortion.abort() // Abort first attempt
   } else {
     resolve(`Success on attempt ${attempt}`)
   }
@@ -236,11 +282,45 @@ const retryableFutur = Futur.of<string, never>(({ resolve, abortController }) =>
 const result1 = await retryableFutur
 console.log(Result.isErr(result1)) // true
 
-// Second run - succeeds with fresh AbortController
+// Second run - succeeds with fresh execution context
 const result2 = await retryableFutur
 if (Result.isOk(result2)) {
   console.log(result2.value) // "Success on attempt 2"
 }
+```
+
+#### Listening to Abort Events
+
+Use `onAbort()` to register callbacks that will be called when the Futur is aborted. You can use this from within the runner or from outside:
+
+```typescript
+import { Futur } from '@theateros/futur'
+
+// From within the runner
+const futur = Futur.of<string, never>(({ resolve, abortion }) => {
+  // Register abort callback from within the runner
+  abortion.onAbort(() => {
+    console.log('Futur was aborted from within!')
+  })
+  
+  setTimeout(() => resolve('done'), 1000)
+})
+
+// Or from outside
+const promise = futur.then()
+
+// Register abort callback from outside
+const removeCallback = futur.onAbort(() => {
+  console.log('Futur was aborted from outside!')
+})
+
+// Abort the Futur
+futur.abort()
+
+// Remove the callback if needed
+removeCallback()
+
+await promise
 ```
 
 ### Deferred Execution
@@ -332,13 +412,15 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
 
 - **`Futur.of<T, E>(runner: FuturRunner): Futur<T, E>`**
 
-  Creates a new Futur from a runner function. The runner receives a payload with `resolve`, `reject`, and `abortController`.
+  Creates a new Futur from a runner function. The runner receives a payload with `resolve`, `reject`, and `abortion`.
 
   ```typescript
-  const futur = Futur.of<string, Error>(({ resolve, reject, abortController }) => {
+  const futur = Futur.of<string, Error>(({ resolve, reject, abortion }) => {
     // Your async logic here
     resolve('success')
     // or: reject(new Error('failure'))
+    // Use abortion.abort() to cancel from within the runner
+    // Use abortion.controller.signal with fetch, streams, etc.
   })
   ```
 
@@ -353,11 +435,15 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
   )
   ```
 
-#### Instance Properties
+#### Instance Methods
 
-- **`abortController: AbortController`**
+- **`then<TResult1>(onfulfilled?): Promise<TResult1>`**
 
-  The AbortController for cancelling the Futur. A new controller is created on each run. Use this to abort from outside the runner.
+  Runs the Futur and returns a Promise. Called automatically when using `await`.
+
+- **`abort(): void`**
+
+  Aborts all active executions of the Futur. When aborted, the Futur rejects with an `AbortedFailure`.
 
   ```typescript
   const futur = Futur.of<string, never>(({ resolve }) => {
@@ -365,16 +451,49 @@ The main class that implements `PromiseLike<Result<T, E | AbortedFailure>>`.
   })
 
   // Cancel after 1 second
-  setTimeout(() => futur.abortController.abort(), 1000)
+  setTimeout(() => futur.abort(), 1000)
 
   const result = await futur // Result.err(AbortedFailure)
   ```
 
-#### Instance Methods
+- **`get aborted: boolean`**
 
-- **`then<TResult1>(onfulfilled?): Promise<TResult1>`**
+  Returns `true` if any active execution of the Futur has been aborted, `false` otherwise.
 
-  Runs the Futur and returns a Promise. Called automatically when using `await`.
+  ```typescript
+  const futur = Futur.of<string, never>(({ resolve }) => {
+    setTimeout(() => resolve('done'), 1000)
+  })
+
+  const promise = futur.then()
+  console.log(futur.aborted) // false
+
+  futur.abort()
+  // Note: aborted may be false after cleanup, check the result instead
+  ```
+
+- **`onAbort(callback: () => void): () => void`**
+
+  Registers a callback that will be called when the Futur is aborted. Returns a function to remove the callback.
+
+  ```typescript
+  const futur = Futur.of<string, never>(({ resolve }) => {
+    setTimeout(() => resolve('done'), 1000)
+  })
+
+  const promise = futur.then()
+
+  const removeCallback = futur.onAbort(() => {
+    console.log('Aborted!')
+  })
+
+  futur.abort() // Calls the callback
+
+  // Remove the callback
+  removeCallback()
+
+  await promise
+  ```
 
 ### `AbortedFailure` Class
 
@@ -402,9 +521,28 @@ The payload passed to the runner function:
 type FuturPayload = {
   resolve: <V>(value: V) => void
   reject: <E>(reason: E) => void
-  abortController: AbortController
+  abortion: FuturAbortion
 }
 ```
+
+#### `FuturAbortion`
+
+The abortion API provided to the runner:
+
+```typescript
+type FuturAbortion = Readonly<{
+  abort: () => void
+  isAborted: () => boolean
+  onAbort: (callback: () => void) => () => void
+  controller: AbortController
+}>
+```
+
+The `abortion` property provides:
+- `abort()`: Abort the Futur operation
+- `isAborted()`: Check if the Futur has been aborted
+- `onAbort(callback)`: Register a callback for abort events (returns a function to remove the callback)
+- `controller`: The `AbortController` instance for use with fetch, streams, or other APIs that support `AbortSignal`
 
 #### `FuturRunner`
 
@@ -422,7 +560,7 @@ type FuturRunner = (payload: FuturPayload) => void
 
 3. **Always handle both success and error cases**: Use `Result.isOk` and `Result.isErr` for type-safe handling
 
-4. **Leverage the AbortController**: Pass it to fetch or other cancellable operations
+4. **Leverage cancellation**: Use `abortion.abort()` from within the runner, or `futur.abort()` from outside. Use `abortion.controller.signal` with fetch, streams, etc.
 
 5. **Type your errors**: Use the error type parameter to ensure type-safe error handling
 
@@ -430,4 +568,4 @@ type FuturRunner = (payload: FuturPayload) => void
 
 7. **Handle AbortedFailure**: When using cancellation, check for `AbortedFailure` to handle cancelled operations gracefully
 
-8. **Pass the abort signal to cancellable APIs**: Use `abortController.signal` with fetch, streams, or other APIs that support `AbortSignal`
+8. **Use the abort controller**: Pass `abortion.controller.signal` to fetch, streams, or other APIs that support `AbortSignal` for automatic cancellation

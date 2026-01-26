@@ -2,6 +2,32 @@ import { Failure } from '@theateros/failure'
 import { Result } from '@theateros/result'
 
 /**
+ * The abortion API of the Futur. It is used to abort the Futur operation.
+ */
+export type FuturAbortion = Readonly<{
+  /**
+   * Abort the Futur operation.
+   */
+  abort: () => void
+
+  /**
+   * Check if the Futur operation has been aborted.
+   */
+  isAborted: () => boolean
+
+  /**
+   * Add a callback to the abort controllers of a futur operation.
+   */
+  onAbort: (callback: () => void) => () => void
+
+  /**
+   * The abort controller to pass down to the Futur runner. Or other
+   * promises that need to be aborted.
+   */
+  controller: AbortController
+}>
+
+/**
  * The payload of the Futur runner. It is sent through the runner function to the Futur instance.
  * Like a Promise, the Futur instance is a PromiseLike, so it can be used with the then method.
  */
@@ -21,9 +47,9 @@ export type FuturPayload = {
   reject: <E>(reason: E) => void
 
   /**
-   * The abort controller to abort the Futur.
+   * The abort API of the Futur. It is used to abort the Futur operation.
    */
-  abortController: AbortController
+  abortion: FuturAbortion
 }
 
 /**
@@ -47,7 +73,7 @@ export class AbortedFailure extends Failure.named('AbortedFailure') {}
  * @typeparam E - The error type.
  */
 export class Futur<T, E> implements PromiseLike<Result<T, E | AbortedFailure>> {
-  public abortController: AbortController
+  private readonly abortControllers: Set<AbortController>
 
   /**
    * Create a new Futur instance from a runner function.
@@ -85,7 +111,7 @@ export class Futur<T, E> implements PromiseLike<Result<T, E | AbortedFailure>> {
   }
 
   constructor(private readonly runner: FuturRunner) {
-    this.abortController = new AbortController()
+    this.abortControllers = new Set()
   }
 
   /**
@@ -100,11 +126,20 @@ export class Futur<T, E> implements PromiseLike<Result<T, E | AbortedFailure>> {
   async then<TResult1 = Result<T, E | AbortedFailure>>(
     onfulfilled?: ((value: Result<T, E | AbortedFailure>) => TResult1 | PromiseLike<TResult1>) | undefined | null,
   ): Promise<TResult1> {
-    try {
-      this.abortController = new AbortController()
+    const abortController = new AbortController()
 
+    this.abortControllers.add(abortController)
+
+    const abortion: FuturAbortion = {
+      abort: () => this.abort(),
+      isAborted: () => this.aborted,
+      onAbort: (callback: () => void) => this.onAbort(callback),
+      controller: abortController,
+    }
+
+    try {
       const p = new Promise((resolve, reject) => {
-        this.abortController.signal.addEventListener('abort', () => {
+        abortController.signal.addEventListener('abort', () => {
           try {
             reject(Failure.ofNamed(AbortedFailure, 'Futur has been aborted'))
           } catch {}
@@ -113,7 +148,7 @@ export class Futur<T, E> implements PromiseLike<Result<T, E | AbortedFailure>> {
         this.runner({
           resolve,
           reject,
-          abortController: this.abortController,
+          abortion,
         })
       })
 
@@ -125,6 +160,47 @@ export class Futur<T, E> implements PromiseLike<Result<T, E | AbortedFailure>> {
       const result = Result.err(error) as Result<T, E>
 
       return onfulfilled ? (onfulfilled(result) as TResult1) : (result as TResult1)
+    } finally {
+      this.abortControllers.delete(abortController)
+    }
+  }
+
+  /**
+   * Abort all the abort controllers of a futur operation.
+   */
+  abort(): void {
+    for (const abortController of this.abortControllers) {
+      abortController.abort()
+    }
+  }
+
+  /**
+   * Check if the futur operation has been aborted.
+   */
+  get aborted(): boolean {
+    if (this.abortControllers.size === 0) {
+      return false
+    }
+
+    return Array.from(this.abortControllers).some(abortController => abortController.signal.aborted)
+  }
+
+  /**
+   * Add a callback to the abort controllers of a futur operation.
+   *
+   * @param callback - The callback to add to the abort controllers.
+   *
+   * @returns A function to remove the callback from the abort controllers.
+   */
+  onAbort(callback: () => void): () => void {
+    for (const abortController of this.abortControllers) {
+      abortController.signal.addEventListener('abort', callback)
+    }
+
+    return () => {
+      for (const abortController of this.abortControllers) {
+        abortController.signal.removeEventListener('abort', callback)
+      }
     }
   }
 }
