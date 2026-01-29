@@ -1,0 +1,31 @@
+{
+  "name": "@theateros/publisher",
+  "version": "0.0.0",
+  "module": "dist/publisher.js",
+  "type": "module",
+  "scripts": {
+    "lint": "biome check .",
+    "test": "bun test",
+    "build:dist": "tsc",
+    "release": "release-it"
+  },
+  "dependencies": {
+    "@theateros/failure": "^0.0.2",
+    "@theateros/result": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "release-it": "catalog:"
+  },
+  "peerDependencies": {},
+  "exports": {
+    ".": {
+      "types": "./dist/publisher.d.ts",
+      "default": "./dist/publisher.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
