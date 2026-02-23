@@ -74,7 +74,11 @@ export namespace Match {
    *
    * @typeparam T - The type to match.
    * @typeparam R - The result type.
+   *
    * @param matchers - The list of matchers to match against.
+   *
+   * @throws UnhandledMatchCaseFailure if there is no default matcher at theat
+   * end of the matcher list.
    *
    * @returns The result of the matcher function.
    */
