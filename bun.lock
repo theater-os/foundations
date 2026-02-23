@@ -33,6 +33,7 @@
       "devDependencies": {
         "@types/bun": "catalog:",
         "release-it": "catalog:",
+        "tsup": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -45,6 +46,7 @@
       "devDependencies": {
         "@types/bun": "catalog:",
         "release-it": "catalog:",
+        "tsup": "catalog:",
         "typescript": "catalog:",
       },
     },
