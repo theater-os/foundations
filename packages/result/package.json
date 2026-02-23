@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
-    "build:dist": "tsup src/result.ts",
+    "build:dist": "rm -rf dist && tsup",
     "release": "release-it"
   },
   "devDependencies": {
@@ -18,6 +18,8 @@
   "exports": {
     ".": {
       "types": "./dist/result.d.ts",
+      "import": "./dist/result.js",
+      "require": "./dist/result.cjs",
       "default": "./dist/result.js"
     }
   },

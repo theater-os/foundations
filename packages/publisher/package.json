@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
-    "build:dist": "rm -rf dist && bunx tsup",
+    "build:dist": "rm -rf dist && tsup",
     "release": "release-it"
   },
   "dependencies": {
@@ -16,7 +16,8 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "release-it": "catalog:"
+    "release-it": "catalog:",
+    "tsup": "catalog:"
   },
   "peerDependencies": {},
   "exports": {
