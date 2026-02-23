@@ -8,7 +8,8 @@
       "packages/failure",
       "packages/result",
       "packages/match",
-      "packages/futur"
+      "packages/futur",
+      "packages/publisher"
     ],
     "catalog": {
       "@types/bun": "1.3.6",

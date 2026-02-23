@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/release-it/release-it/latest/config-schema.json",
+  "git": {
+    "requireCleanWorkingDir": true,
+    "commitMessage": "chore: new @theateros/publisher release 😱 - v${version} 🚀",
+    "tagName": "@theateros/publisher@v${version}",
+    "push": true,
+    "pushTags": true
+  },
+  "npm": {
+    "publish": true
+  }
+}

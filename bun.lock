@@ -24,7 +24,7 @@
     },
     "packages/futur": {
       "name": "@theateros/futur",
-      "version": "0.0.0",
+      "version": "0.0.1",
       "dependencies": {
         "@theateros/failure": "^0.0.2",
         "@theateros/result": "^0.0.1",
@@ -40,6 +40,19 @@
       "version": "0.0.1",
       "dependencies": {
         "@theateros/failure": "^0.0.2",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "release-it": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/publisher": {
+      "name": "@theateros/publisher",
+      "version": "0.0.0",
+      "dependencies": {
+        "@theateros/failure": "^0.0.2",
+        "@theateros/result": "^0.0.1",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -146,6 +159,8 @@
     "@theateros/futur": ["@theateros/futur@workspace:packages/futur"],
 
     "@theateros/match": ["@theateros/match@workspace:packages/match"],
+
+    "@theateros/publisher": ["@theateros/publisher@workspace:packages/publisher"],
 
     "@theateros/result": ["@theateros/result@workspace:packages/result"],
 
