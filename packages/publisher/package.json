@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
-    "build:dist": "tsc",
+    "build:dist": "rm -rf dist && tsup",
     "release": "release-it"
   },
   "dependencies": {
@@ -16,12 +16,15 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "release-it": "catalog:"
+    "release-it": "catalog:",
+    "tsup": "catalog:"
   },
   "peerDependencies": {},
   "exports": {
     ".": {
       "types": "./dist/publisher.d.ts",
+      "import": "./dist/publsher.js",
+      "require": "./dist/publisher.cjs",
       "default": "./dist/publisher.js"
     }
   },

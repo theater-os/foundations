@@ -6,17 +6,20 @@
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
-    "build:dist": "tsc",
+    "build:dist": "rm -rf dist && tsup",
     "release": "release-it"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "release-it": "catalog:"
+    "release-it": "catalog:",
+    "tsup": "catalog:"
   },
   "exports": {
     ".": {
       "types": "./dist/result.d.ts",
+      "import": "./dist/result.js",
+      "require": "./dist/result.cjs",
       "default": "./dist/result.js"
     }
   },

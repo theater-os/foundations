@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
-    "build:dist": "tsc",
+    "build:dist": "rm -rf dist && tsup",
     "release": "release-it"
   },
   "dependencies": {
@@ -16,12 +16,15 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "release-it": "catalog:"
+    "release-it": "catalog:",
+    "tsup": "catalog:"
   },
   "peerDependencies": {},
   "exports": {
     ".": {
       "types": "./dist/futur.d.ts",
+      "import": "./dist/futur.js",
+      "require": "./dist/futur.cjs",
       "default": "./dist/futur.js"
     }
   },

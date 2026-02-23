@@ -74,7 +74,11 @@ export namespace Match {
    *
    * @typeparam T - The type to match.
    * @typeparam R - The result type.
+   *
    * @param matchers - The list of matchers to match against.
+   *
+   * @throws UnhandledMatchCaseFailure if there is no default matcher at theat
+   * end of the matcher list.
    *
    * @returns The result of the matcher function.
    */
@@ -151,6 +155,10 @@ export namespace Match {
     matcher9: Matcher<T9, R9>,
     defaultMatcher: DefaultMatcher<R10>,
   ): (value: unknown) => R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10
+  // biome-ignore lint/suspicious/noExplicitAny: type inference is done above
+  export function of<const MS extends MatcherList<any, any>>(
+    ...matchers: MS
+  ): (value: unknown) => ReturnType<MS[number][1]>
   // biome-ignore lint/suspicious/noExplicitAny: type inference is done above
   export function of<R>(...matchers: MatcherList<any, any>) {
     return (value: unknown): R => {
