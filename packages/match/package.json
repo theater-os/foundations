@@ -10,7 +10,7 @@
     "release": "release-it"
   },
   "dependencies": {
-    "@theateros/failure": "^0.0.2"
+    "@theateros/failure": "^0.0.3"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
