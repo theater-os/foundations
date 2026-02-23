@@ -22,7 +22,7 @@
     "lint": "biome check .",
     "test": "turbo test",
     "clean:dist": "bun .scripts/clean-dist.ts",
-    "build:dist": "bun run clean:dist && bun run .scripts/build-dist.ts"
+    "build:dist": "bun clean:dist && bun .scripts/build-dist.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.11",
