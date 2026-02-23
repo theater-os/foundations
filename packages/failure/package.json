@@ -6,18 +6,21 @@
   "scripts": {
     "lint": "biome check .",
     "test": "bun test",
-    "build:dist": "tsc",
+    "build:dist": "rm -rf dist && tsup",
     "release": "release-it"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "release-it": "catalog:"
+    "release-it": "catalog:",
+    "tsup": "catalog:"
   },
   "peerDependencies": {},
   "exports": {
     ".": {
       "types": "./dist/failure.d.ts",
+      "import": "./dist/failure.js",
+      "require": "./dist/failure.cjs",
       "default": "./dist/failure.js"
     }
   },
