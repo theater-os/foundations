@@ -62,6 +62,20 @@ A lazy, type-safe asynchronous computation wrapper that combines Promises with R
 
 [📖 Read the documentation →](./packages/futur/README.md)
 
+### [@theateros/publisher](./packages/publisher/README.md)
+
+A type-safe publish/subscribe implementation for TypeScript that provides structured event broadcasting with topic routing, async subscriber support, and Result-based error isolation.
+
+**Key Features:**
+
+- Type-safe data with generic publisher instances
+- Result-based error handling — subscriber errors are isolated, others keep running
+- First-class async with sequential awaiting of subscribers
+- Topic routing to target specific subscriber groups
+- Clean unsubscribe via returned function — no listener reference needed
+
+[📖 Read the documentation →](./packages/publisher/README.md)
+
 ## 🚀 Quick Start
 
 Install any package individually:
@@ -71,12 +85,13 @@ npm install @theateros/failure
 npm install @theateros/result
 npm install @theateros/match
 npm install @theateros/futur
+npm install @theateros/publisher
 ```
 
 Or install multiple packages:
 
 ```bash
-npm install @theateros/failure @theateros/result @theateros/match @theateros/futur
+npm install @theateros/failure @theateros/result @theateros/match @theateros/futur @theateros/publisher
 ```
 
 ## 🤝 Contributing
