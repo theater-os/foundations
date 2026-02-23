@@ -28,8 +28,8 @@
       "name": "@theateros/futur",
       "version": "0.0.1",
       "dependencies": {
-        "@theateros/failure": "^0.0.2",
-        "@theateros/result": "^0.0.1",
+        "@theateros/failure": "^0.0.3",
+        "@theateros/result": "^0.0.2",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -40,7 +40,7 @@
     },
     "packages/match": {
       "name": "@theateros/match",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "dependencies": {
         "@theateros/failure": "^0.0.2",
       },
@@ -644,10 +644,6 @@
     "yoctocolors": ["yoctocolors@2.1.2", "", {}, "sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug=="],
 
     "yoctocolors-cjs": ["yoctocolors-cjs@2.1.3", "", {}, "sha512-U/PBtDf35ff0D8X8D0jfdzHYEPFxAI7jJlxZXwCSez5M3190m+QobIfh+sWDWSHMCWWJN2AWamkegn6vr6YBTw=="],
-
-    "@theateros/futur/@theateros/failure": ["@theateros/failure@0.0.2", "", {}, "sha512-zDKdj7A3UtQhl7yYFCnv/2CS0OLgHE4qWdKPnJAbYlo8Z3sMhGo7gfQq/b0GW4DJ0/VZkf/NocShOpX9L/USgg=="],
-
-    "@theateros/futur/@theateros/result": ["@theateros/result@0.0.1", "", {}, "sha512-Vqk47NL02vx/KBGCiiawhs92PU01PzTkiXHSyFeS9MUvqcBHcXWxynd8LneX1yvtePyjlA8phOpRfwS0BA8PhA=="],
 
     "@theateros/publisher/@theateros/failure": ["@theateros/failure@0.0.2", "", {}, "sha512-zDKdj7A3UtQhl7yYFCnv/2CS0OLgHE4qWdKPnJAbYlo8Z3sMhGo7gfQq/b0GW4DJ0/VZkf/NocShOpX9L/USgg=="],
 
