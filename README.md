@@ -62,6 +62,20 @@ A lazy, type-safe asynchronous computation wrapper that combines Promises with R
 
 [📖 Read the documentation →](./packages/futur/README.md)
 
+### [@theateros/entity](./packages/entity/README.md)
+
+The missing building block for Clean Architecture in TypeScript. Create validated, branded, type-safe domain entities from any schema library — with zero boilerplate and zero compromise.
+
+**Key Features:**
+
+- Validated construction — every entity goes through schema validation before it exists in your domain
+- Branded types — entities carry an invisible type-level brand that proves they came from the right factory
+- Standard Schema plug-and-play — works with Zod, Valibot, ArkType, and any `@standard-schema/spec` compatible library
+- Result-based safety — no exceptions, creation either succeeds with a typed value or fails with structured errors
+- Extensible factories — attach custom constructors, metadata, and sub-factories directly to the entity factory
+
+[📖 Read the documentation →](./packages/entity/README.md)
+
 ### [@theateros/publisher](./packages/publisher/README.md)
 
 A type-safe publish/subscribe implementation for TypeScript that provides structured event broadcasting with topic routing, async subscriber support, and Result-based error isolation.
@@ -86,12 +100,13 @@ npm install @theateros/result
 npm install @theateros/match
 npm install @theateros/futur
 npm install @theateros/publisher
+npm install @theateros/entity
 ```
 
 Or install multiple packages:
 
 ```bash
-npm install @theateros/failure @theateros/result @theateros/match @theateros/futur @theateros/publisher
+npm install @theateros/failure @theateros/result @theateros/match @theateros/futur @theateros/publisher @theateros/entity
 ```
 
 ## 🤝 Contributing
