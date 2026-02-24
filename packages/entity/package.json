@@ -25,10 +25,10 @@
   "peerDependencies": {},
   "exports": {
     ".": {
-      "types": "./dist/publisher.d.ts",
-      "import": "./dist/publsher.js",
-      "require": "./dist/publisher.cjs",
-      "default": "./dist/publisher.js"
+      "types": "./dist/entity.d.ts",
+      "import": "./dist/entity.js",
+      "require": "./dist/entity.cjs",
+      "default": "./dist/entity.js"
     }
   },
   "publishConfig": {
