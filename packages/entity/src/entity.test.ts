@@ -1,5 +1,5 @@
-import { Result } from '@theateros/result'
 import { describe, it, expect } from 'bun:test'
+import { Result } from '@theateros/result'
 import * as z from 'zod'
 import { Entity } from './entity'
 
