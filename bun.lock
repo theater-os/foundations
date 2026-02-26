@@ -16,7 +16,7 @@
     },
     "packages/entity": {
       "name": "@theateros/entity",
-      "version": "0.0.0",
+      "version": "0.0.1",
       "dependencies": {
         "@standard-schema/spec": "^1.1.0",
         "@theateros/failure": "^0.0.3",
@@ -85,6 +85,9 @@
     "packages/result": {
       "name": "@theateros/result",
       "version": "0.0.2",
+      "dependencies": {
+        "@theateros/failure": "^0.0.3",
+      },
       "devDependencies": {
         "@types/bun": "catalog:",
         "release-it": "catalog:",
