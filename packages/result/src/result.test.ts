@@ -692,7 +692,7 @@ describe('Result.safeLifteded', () => {
 
 describe('Result.asyncSafeLifted', () => {
   it('should wrap a plain return value in an Ok result', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => 42)
+    const safeFn = Result.asyncSafeLifted(() => 42)
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -703,7 +703,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should unwrap a returned Ok result', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => Result.ok('lifted'))
+    const safeFn = Result.asyncSafeLifted(() => Result.ok('lifted'))
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -714,7 +714,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should recursively unwrap nested Ok results', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => Result.ok(Result.ok(Result.ok('deep'))))
+    const safeFn = Result.asyncSafeLifted(() => Result.ok(Result.ok(Result.ok('deep'))))
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -725,7 +725,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should return Err when the function returns an Err result', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => Result.err('inner error'))
+    const safeFn = Result.asyncSafeLifted(() => Result.err('inner error'))
     const result = await safeFn()
 
     expect(Result.isErr(result)).toBe(true)
@@ -736,7 +736,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should return Err when a nested Ok wraps an Err result', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => Result.ok(Result.err('nested error')))
+    const safeFn = Result.asyncSafeLifted(() => Result.ok(Result.err('nested error')))
     const result = await safeFn()
 
     expect(Result.isErr(result)).toBe(true)
@@ -747,7 +747,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should return Err when the function throws', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => {
+    const safeFn = Result.asyncSafeLifted(() => {
       throw new Error('thrown error')
     })
     const result = await safeFn()
@@ -761,7 +761,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should use onError callback to transform thrown errors', async () => {
-    const safeFn = await Result.asyncSafeLifted(
+    const safeFn = Result.asyncSafeLifted(
       () => {
         throw new Error('original')
       },
@@ -777,7 +777,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should use onError callback when an inner Err is propagated', async () => {
-    const safeFn = await Result.asyncSafeLifted(
+    const safeFn = Result.asyncSafeLifted(
       () => Result.err('inner'),
       () => 'transformed',
     )
@@ -791,7 +791,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should handle async functions that return a plain value', async () => {
-    const safeFn = await Result.asyncSafeLifted(async () => 'async value')
+    const safeFn = Result.asyncSafeLifted(async () => 'async value')
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -802,7 +802,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should handle async functions that return an Ok result', async () => {
-    const safeFn = await Result.asyncSafeLifted(async () => Result.ok('async ok'))
+    const safeFn = Result.asyncSafeLifted(async () => Result.ok('async ok'))
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -813,7 +813,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should handle async functions that return an Err result', async () => {
-    const safeFn = await Result.asyncSafeLifted(async () => Result.err('async error'))
+    const safeFn = Result.asyncSafeLifted(async () => Result.err('async error'))
     const result = await safeFn()
 
     expect(Result.isErr(result)).toBe(true)
@@ -824,7 +824,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should handle async functions that reject', async () => {
-    const safeFn = await Result.asyncSafeLifted(async () => {
+    const safeFn = Result.asyncSafeLifted(async () => {
       throw new Error('async rejection')
     })
     const result = await safeFn()
@@ -838,7 +838,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should handle functions with parameters', async () => {
-    const safeAdd = await Result.asyncSafeLifted(async (a: number, b: number) => Result.ok(a + b))
+    const safeAdd = Result.asyncSafeLifted(async (a: number, b: number) => Result.ok(a + b))
     const result = await safeAdd(3, 4)
 
     expect(Result.isOk(result)).toBe(true)
@@ -849,7 +849,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should handle functions that return undefined', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => undefined)
+    const safeFn = Result.asyncSafeLifted(() => undefined)
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -860,7 +860,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should handle functions that return null', async () => {
-    const safeFn = await Result.asyncSafeLifted(() => null)
+    const safeFn = Result.asyncSafeLifted(() => null)
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -871,7 +871,7 @@ describe('Result.asyncSafeLifted', () => {
   })
 
   it('should be reusable across multiple calls', async () => {
-    const safeFn = await Result.asyncSafeLifted(async (x: number) => Result.ok(x * 2))
+    const safeFn = Result.asyncSafeLifted(async (x: number) => Result.ok(x * 2))
     const result1 = await safeFn(5)
     const result2 = await safeFn(10)
 
@@ -886,7 +886,7 @@ describe('Result.asyncSafeLifted', () => {
 
   it('should handle errors on subsequent calls', async () => {
     let shouldFail = false
-    const safeFn = await Result.asyncSafeLifted(async () => {
+    const safeFn = Result.asyncSafeLifted(async () => {
       if (shouldFail) {
         return Result.err('failed')
       }
@@ -905,7 +905,7 @@ describe('Result.asyncSafeLifted', () => {
 
 describe('Result.asyncSafe', () => {
   it('should return a function that returns Ok result for a successful sync function', async () => {
-    const safeFn = await Result.asyncSafe(() => 'success')
+    const safeFn = Result.asyncSafe(() => 'success')
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -916,7 +916,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should return a function that returns Ok result for a successful async function', async () => {
-    const safeFn = await Result.asyncSafe(async () => 'async success')
+    const safeFn = Result.asyncSafe(async () => 'async success')
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -927,9 +927,9 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should return Ok with different value types', async () => {
-    const numberFn = await Result.asyncSafe(async () => 42)
-    const objectFn = await Result.asyncSafe(async () => ({ key: 'value' }))
-    const arrayFn = await Result.asyncSafe(async () => [1, 2, 3])
+    const numberFn = Result.asyncSafe(async () => 42)
+    const objectFn = Result.asyncSafe(async () => ({ key: 'value' }))
+    const arrayFn = Result.asyncSafe(async () => [1, 2, 3])
 
     expect(Result.unwrap(await numberFn())).toBe(42)
     expect(Result.unwrap(await objectFn())).toEqual({ key: 'value' })
@@ -937,7 +937,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should return Err when the sync function throws', async () => {
-    const safeFn = await Result.asyncSafe(() => {
+    const safeFn = Result.asyncSafe(() => {
       throw new Error('sync error')
     })
     const result = await safeFn()
@@ -951,7 +951,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should return Err when the async function rejects', async () => {
-    const safeFn = await Result.asyncSafe(async () => {
+    const safeFn = Result.asyncSafe(async () => {
       throw new Error('async rejection')
     })
     const result = await safeFn()
@@ -965,7 +965,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should use onError callback to transform thrown errors', async () => {
-    const safeFn = await Result.asyncSafe(
+    const safeFn = Result.asyncSafe(
       () => {
         throw new Error('original')
       },
@@ -981,7 +981,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should use onError callback to transform async rejections', async () => {
-    const safeFn = await Result.asyncSafe(
+    const safeFn = Result.asyncSafe(
       async () => {
         throw 'async string error'
       },
@@ -997,7 +997,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should NOT lift - wraps a returned Result inside an Ok', async () => {
-    const safeFn = await Result.asyncSafe(async () => Result.ok('inner'))
+    const safeFn = Result.asyncSafe(async () => Result.ok('inner'))
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -1008,7 +1008,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should handle functions with parameters', async () => {
-    const safeAdd = await Result.asyncSafe(async (a: number, b: number) => a + b)
+    const safeAdd = Result.asyncSafe(async (a: number, b: number) => a + b)
     const result = await safeAdd(3, 4)
 
     expect(Result.isOk(result)).toBe(true)
@@ -1019,7 +1019,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should handle functions that return undefined', async () => {
-    const safeFn = await Result.asyncSafe(async () => undefined)
+    const safeFn = Result.asyncSafe(async () => undefined)
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -1030,7 +1030,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should handle functions that return null', async () => {
-    const safeFn = await Result.asyncSafe(async () => null)
+    const safeFn = Result.asyncSafe(async () => null)
     const result = await safeFn()
 
     expect(Result.isOk(result)).toBe(true)
@@ -1041,7 +1041,7 @@ describe('Result.asyncSafe', () => {
   })
 
   it('should be reusable across multiple calls', async () => {
-    const safeFn = await Result.asyncSafe(async (x: number) => x * 2)
+    const safeFn = Result.asyncSafe(async (x: number) => x * 2)
     const result1 = await safeFn(5)
     const result2 = await safeFn(10)
 
@@ -1056,7 +1056,7 @@ describe('Result.asyncSafe', () => {
 
   it('should handle errors on subsequent calls', async () => {
     let shouldThrow = false
-    const safeFn = await Result.asyncSafe(async () => {
+    const safeFn = Result.asyncSafe(async () => {
       if (shouldThrow) {
         throw new Error('Error on second call')
       }

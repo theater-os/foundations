@@ -363,7 +363,7 @@ export namespace Result {
    *
    * @returns A new async function that wraps the given function in a Result.
    */
-  export async function asyncSafe<Fn extends AnyFn, E = unknown>(fn: Fn, onError?: (error: unknown) => E) {
+  export function asyncSafe<Fn extends AnyFn, E = unknown>(fn: Fn, onError?: (error: unknown) => E) {
     return async (...args: Parameters<Fn>): Promise<Result<Awaited<ReturnType<Fn>>, E>> => {
       try {
         const value = (await Promise.resolve(fn(...args))) as Awaited<ReturnType<Fn>>
@@ -454,7 +454,7 @@ export namespace Result {
    *
    * @returns A new async function that wraps the given function in a lifted Result.
    */
-  export async function asyncSafeLifted<Fn extends AnyFn, E = InferLiftedErr<Awaited<ReturnType<Fn>>>>(
+  export function asyncSafeLifted<Fn extends AnyFn, E = InferLiftedErr<Awaited<ReturnType<Fn>>>>(
     fn: Fn,
     onError?: (error: unknown) => E,
   ) {
