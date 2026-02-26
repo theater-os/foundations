@@ -9,6 +9,9 @@
     "build:dist": "rm -rf dist && tsup",
     "release": "release-it"
   },
+  "dependencies": {
+    "@theateros/failure": "^0.0.3"
+  },
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:",
