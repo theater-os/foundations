@@ -222,8 +222,13 @@ export namespace Result {
   // biome-ignore lint/suspicious/noExplicitAny: we want any Err here
   export type UnwrapLift<R, D = unknown> = R extends Err<any> ? D : R extends Ok<infer S> ? UnwrapLift<S, D> : R
 
+  /**
+   * Infer the default value of a lift function
+   *
+   * @private
+   */
   // biome-ignore lint/suspicious/noExplicitAny: we want any Err here
-  export type InferUnwrapLiftDefaultValue<R, D = unknown> = R extends Err<any>
+  type InferUnwrapLiftDefaultValue<R, D = unknown> = R extends Err<any>
     ? D
     : R extends Ok<infer T>
       ? InferUnwrapLiftDefaultValue<T, D>
