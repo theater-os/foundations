@@ -3,7 +3,9 @@
     "allow": [
       "Bash(bun test:*)",
       "WebSearch",
-      "WebFetch(domain:standardschema.dev)"
+      "WebFetch(domain:standardschema.dev)",
+      "Bash(head:*)",
+      "Bash(cat:*)"
     ]
   }
 }
