@@ -1,0 +1,33 @@
+{
+  "name": "@theateros/flow",
+  "version": "0.0.3",
+  "module": "dist/flow.js",
+  "type": "module",
+  "scripts": {
+    "lint": "biome check .",
+    "test": "bun test",
+    "build:dist": "rm -rf dist && tsup",
+    "release": "release-it"
+  },
+  "dependencies": {
+    "@theateros/failure": "^0.0.3",
+    "@theateros/result": "^0.0.3"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "release-it": "catalog:",
+    "tsup": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/flow.d.ts",
+      "import": "./dist/flow.js",
+      "require": "./dist/flow.cjs",
+      "default": "./dist/flow.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -10,7 +10,8 @@
       "packages/match",
       "packages/futur",
       "packages/publisher",
-      "packages/entity"
+      "packages/entity",
+      "packages/flow"
     ],
     "catalog": {
       "@types/bun": "1.3.6",
