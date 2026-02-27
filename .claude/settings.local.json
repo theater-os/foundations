@@ -3,7 +3,8 @@
     "allow": [
       "Bash(bun test:*)",
       "WebSearch",
-      "WebFetch(domain:standardschema.dev)"
+      "WebFetch(domain:standardschema.dev)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }
